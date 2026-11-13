@@ -1,0 +1,42 @@
+name: Update SOXL Daily Close & Dashboard
+
+on:
+  schedule:
+    # Mon-Fri 22:00 UTC (07:00 KST, after US market close)
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install --no-cache-dir yfinance pandas numpy
+
+      - name: Fetch latest SOXL close & regenerate dashboard
+        run: |
+          python fetch_latest_soxl.py
+          python generate_quantum_dashboard.py
+
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/SOXL_1d.csv soxl_latest.json quantum_dashboard.html
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update SOXL daily close ($(date -u +%Y-%m-%d))"
+            git push
+          fi
