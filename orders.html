@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JW 퀀트 실전 매매 & 매매일지</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -165,14 +166,29 @@
           <span id="subVaultReserve" class="text-[11px] text-amber-800/70 font-mono block mt-0.5">1회차 한도: $4,063</span>
         </div>
         <div class="rounded-2xl bg-sky-50/80 border-2 border-sky-100 px-4 py-3">
-          <span class="text-[11px] font-bold text-sky-800 block">오늘 밤 매수 후 잔금</span>
-          <span id="valCashAfterBuy" class="text-lg font-mono font-extrabold text-sky-700 mt-0.5 block">$2,510.41</span>
-          <span id="subCashAfterBuy" class="text-[11px] text-emerald-700 font-mono font-semibold block mt-0.5">✓ 예비금 보존</span>
+          <span class="text-[11px] font-bold text-sky-800 block">50일 이평선 (SMA50)</span>
+          <span id="outSma50" class="text-lg font-mono font-extrabold text-sky-700 mt-0.5 block">$126.06</span>
+          <span id="subSma50" class="text-[11px] text-rose-600 font-mono font-semibold block mt-0.5">현재가 대비 -34.9%</span>
         </div>
-        <div class="rounded-2xl bg-emerald-50/80 border-2 border-emerald-100 px-4 py-3">
-          <span class="text-[11px] font-bold text-emerald-800 block">쿼터 익절 체결 시 잔금</span>
-          <span id="valCashAfterSell" class="text-lg font-mono font-extrabold text-emerald-700 mt-0.5 block">$37,965</span>
-          <span id="subCashAfterSell" class="text-[11px] text-emerald-700 font-mono font-semibold block mt-0.5">+$34,305 현금 확충</span>
+        <div class="rounded-2xl bg-purple-50/75 border-2 border-purple-100 px-4 py-3">
+          <span class="text-[11px] font-bold text-purple-800 block">200일 이평선 (SMA200)</span>
+          <span id="outSma200" class="text-lg font-mono font-extrabold text-purple-700 mt-0.5 block">$122.98</span>
+          <span id="subSma200" class="text-[11px] text-rose-600 font-mono font-semibold block mt-0.5">현재가 대비 -33.2%</span>
+        </div>
+      </div>
+
+      <!-- SOXL Price & MA Trend Chart -->
+      <div class="rounded-2xl bg-white/80 border-2 border-pink-100 p-3.5 sm:p-4 space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs font-bold text-[#4a3728]">SOXL 주가 추이 (최근 120거래일)</span>
+          <div class="flex items-center gap-3 text-[11px] font-mono font-semibold">
+            <span class="flex items-center gap-1 text-[#4a3728]"><span class="w-2.5 h-0.5 bg-pink-500 inline-block rounded"></span> 종가</span>
+            <span class="flex items-center gap-1 text-sky-700"><span class="w-2.5 h-0.5 bg-sky-500 inline-block rounded"></span> 50일선</span>
+            <span class="flex items-center gap-1 text-purple-700"><span class="w-2.5 h-0.5 bg-purple-500 inline-block rounded"></span> 200일선</span>
+          </div>
+        </div>
+        <div class="h-44 sm:h-52 w-full">
+          <canvas id="chartTrend"></canvas>
         </div>
       </div>
 
@@ -488,10 +504,14 @@
         }
       }
 
-      document.getElementById("valCashAfterBuy").textContent = `$${cashAfterBuyVal.toFixed(2)}`;
-      document.getElementById("subCashAfterBuy").textContent = cashAfterBuyVal >= vaultReserve ? "✓ 3% 예비금 보존" : "⚠️ 예비금 일부 사용";
-      document.getElementById("valCashAfterSell").textContent = `$${Math.round(cashAfterSellVal).toLocaleString()}`;
-      document.getElementById("subCashAfterSell").textContent = `+$${Math.round(Math.max(0, cashAfterSellVal - cash)).toLocaleString()} 현금 회수`;
+      const sma50Diff = sma50 > 0 ? ((close - sma50) / sma50) * 100 : 0;
+      document.getElementById("outSma50").textContent = `$${sma50.toFixed(2)}`;
+      document.getElementById("subSma50").textContent = `이격도 ${sma50Diff >= 0 ? "+" : ""}${sma50Diff.toFixed(1)}%`;
+      document.getElementById("subSma50").className = `text-[11px] font-mono font-semibold block mt-0.5 ${sma50Diff >= 0 ? "text-emerald-700" : "text-rose-600"}`;
+
+      document.getElementById("outSma200").textContent = `$${sma200.toFixed(2)}`;
+      document.getElementById("subSma200").textContent = `이격도 ${sma200Diff >= 0 ? "+" : ""}${sma200Diff.toFixed(1)}%`;
+      document.getElementById("subSma200").className = `text-[11px] font-mono font-semibold block mt-0.5 ${sma200Diff >= 0 ? "text-emerald-700" : "text-rose-600"}`;
 
       // Render Orders
       const container = document.getElementById("ordersContainer");
@@ -517,18 +537,14 @@
             </div>
             <p class="text-xs text-amber-900/70">${o.reason}</p>
           </div>
-          <div class="grid grid-cols-3 gap-2 lg:flex lg:items-center lg:gap-5 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0 shrink-0 w-full lg:w-auto">
+          <div class="grid grid-cols-2 gap-3 lg:flex lg:items-center lg:gap-6 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0 shrink-0 w-full lg:w-auto">
             <div class="text-left lg:text-right">
               <span class="text-[10px] text-amber-800/60 font-bold block">주문 단가</span>
               <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.priceStr}</span>
             </div>
-            <div class="text-center lg:text-right lg:min-w-[68px]">
+            <div class="text-right lg:min-w-[68px]">
               <span class="text-[10px] text-amber-800/60 font-bold block">수량</span>
               <span class="text-xs sm:text-sm font-mono font-extrabold ${isBuy ? "text-sky-700" : isWait ? "text-amber-700" : "text-pink-600"}">${o.qtyStr}</span>
-            </div>
-            <div class="text-right lg:min-w-[88px]">
-              <span class="text-[10px] text-amber-800/60 font-bold block">예상 금액</span>
-              <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.amountStr}</span>
             </div>
           </div>
         `;
@@ -680,6 +696,105 @@
       URL.revokeObjectURL(a.href);
     }
 
+    let trendChartInstance = null;
+
+    function renderTrendChart(history) {
+      const ctx = document.getElementById("chartTrend");
+      if (!ctx || typeof Chart === "undefined") return;
+
+      let labels, closes, sma50s, sma200s;
+      if (history && Array.isArray(history.dates) && history.dates.length > 0) {
+        labels = history.dates.map(d => d.slice(5));
+        closes = history.closes;
+        sma50s = history.sma50;
+        sma200s = history.sma200;
+      } else {
+        const tail = LAST_200_CLOSES.slice(-120);
+        labels = tail.map((_, i) => `D-${tail.length - i}`);
+        closes = tail;
+        sma50s = tail.map((_, idx) => {
+          const slice = LAST_200_CLOSES.slice(Math.max(0, 80 + idx - 49), 80 + idx + 1);
+          return Number((slice.reduce((a, b) => a + b, 0) / slice.length).toFixed(2));
+        });
+        sma200s = tail.map((_, idx) => {
+          const slice = LAST_200_CLOSES.slice(0, 80 + idx + 1);
+          return Number((slice.reduce((a, b) => a + b, 0) / slice.length).toFixed(2));
+        });
+      }
+
+      if (trendChartInstance) trendChartInstance.destroy();
+      trendChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "SOXL 종가",
+              data: closes,
+              borderColor: "#ec4899",
+              backgroundColor: "rgba(236, 72, 153, 0.08)",
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: true,
+              tension: 0.2
+            },
+            {
+              label: "50일선",
+              data: sma50s,
+              borderColor: "#0ea5e9",
+              borderWidth: 1.5,
+              borderDash: [4, 3],
+              pointRadius: 0,
+              fill: false,
+              tension: 0.2
+            },
+            {
+              label: "200일선",
+              data: sma200s,
+              borderColor: "#a855f7",
+              borderWidth: 1.5,
+              borderDash: [6, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "rgba(255, 255, 255, 0.96)",
+              titleColor: "#4a3728",
+              bodyColor: "#4a3728",
+              borderColor: "#fbcfe8",
+              borderWidth: 1.5,
+              callbacks: {
+                label: (c) => `${c.dataset.label}: $${Number(c.parsed.y).toFixed(2)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: "#92400e", font: { size: 10, family: "JetBrains Mono" }, maxTicksLimit: 6 }
+            },
+            y: {
+              grid: { color: "rgba(244, 114, 182, 0.12)" },
+              ticks: {
+                color: "#92400e",
+                font: { size: 10, family: "JetBrains Mono" },
+                callback: (v) => "$" + v
+              }
+            }
+          }
+        }
+      });
+    }
+
     // =========================================================================
     // Live Price Sync (/api/soxl or ./soxl_latest.json)
     // =========================================================================
@@ -706,6 +821,7 @@
               document.getElementById("lastUpdatedSpan").textContent = d.date ? `🟢 ${d.date} 종가` : "🟢 종가 연동";
               document.getElementById("lastUpdatedSpan").className = "text-[11px] text-emerald-700 font-mono font-bold";
               calculateOrders(false);
+              renderTrendChart(d.history);
               if (!silent) showToast(`SOXL 종가 $${d.price.toFixed(2)} 동기화 완료!`);
               ok = true;
               break;
@@ -713,6 +829,8 @@
           }
         } catch (e) {}
       }
+
+      if (!ok) renderTrendChart(null);
 
       if (!silent) {
         icon.className = "";

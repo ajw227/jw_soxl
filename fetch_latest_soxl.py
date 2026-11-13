@@ -39,12 +39,26 @@ def main():
     combined.to_csv(csv_path, index=False)
 
     closes = combined["Close"].astype(float).tolist()
+    dates = combined["datetime"].astype(str).tolist()
+    n = len(closes)
+    tail_start = max(0, n - 120)
+    hist_dates = dates[tail_start:]
+    hist_closes = [round(closes[i], 2) for i in range(tail_start, n)]
+    hist_sma50 = [round(sum(closes[max(0, i - 49):i + 1]) / min(50, i + 1), 2) for i in range(tail_start, n)]
+    hist_sma200 = [round(sum(closes[max(0, i - 199):i + 1]) / min(200, i + 1), 2) for i in range(tail_start, n)]
+
     latest = {
         "ok": True,
-        "date": str(combined["datetime"].iloc[-1]),
+        "date": dates[-1],
         "price": round(closes[-1], 4),
         "sma50": round(sum(closes[-50:]) / len(closes[-50:]), 4),
         "sma200": round(sum(closes[-200:]) / len(closes[-200:]), 4),
+        "history": {
+            "dates": hist_dates,
+            "closes": hist_closes,
+            "sma50": hist_sma50,
+            "sma200": hist_sma200,
+        },
     }
     json_path.write_text(json.dumps(latest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Updated CSV ({len(combined)} rows) & soxl_latest.json: {latest}")
