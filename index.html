@@ -153,8 +153,8 @@
         </div>
       </div>
 
-      <!-- 4 KPI Strip -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+      <!-- 2 KPI Strip -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
         <div class="rounded-2xl bg-pink-50/70 border-2 border-pink-100 px-4 py-3">
           <span class="text-[11px] font-bold text-pink-700 block">계좌 총 평가 자산</span>
           <span id="outTotalEquity" class="text-lg font-mono font-extrabold text-[#4a3728] mt-0.5 block">$83,471</span>
@@ -165,16 +165,6 @@
           <span id="valCurrentCash" class="text-lg font-mono font-extrabold text-amber-700 mt-0.5 block">$3,659.95</span>
           <span id="subVaultReserve" class="text-[11px] text-amber-800/70 font-mono block mt-0.5">1회차 한도: $4,063</span>
         </div>
-        <div class="rounded-2xl bg-sky-50/80 border-2 border-sky-100 px-4 py-3">
-          <span class="text-[11px] font-bold text-sky-800 block">50일 이평선 (SMA50)</span>
-          <span id="outSma50" class="text-lg font-mono font-extrabold text-sky-700 mt-0.5 block">$126.06</span>
-          <span id="subSma50" class="text-[11px] text-rose-600 font-mono font-semibold block mt-0.5">현재가 대비 -34.9%</span>
-        </div>
-        <div class="rounded-2xl bg-purple-50/75 border-2 border-purple-100 px-4 py-3">
-          <span class="text-[11px] font-bold text-purple-800 block">200일 이평선 (SMA200)</span>
-          <span id="outSma200" class="text-lg font-mono font-extrabold text-purple-700 mt-0.5 block">$122.98</span>
-          <span id="subSma200" class="text-[11px] text-rose-600 font-mono font-semibold block mt-0.5">현재가 대비 -33.2%</span>
-        </div>
       </div>
 
       <!-- SOXL Price & MA Trend Chart -->
@@ -183,8 +173,8 @@
           <span class="text-xs font-bold text-[#4a3728]">SOXL 주가 추이 (최근 120거래일)</span>
           <div class="flex items-center gap-3 text-[11px] font-mono font-semibold">
             <span class="flex items-center gap-1 text-[#4a3728]"><span class="w-2.5 h-0.5 bg-pink-500 inline-block rounded"></span> 종가</span>
-            <span class="flex items-center gap-1 text-sky-700"><span class="w-2.5 h-0.5 bg-sky-500 inline-block rounded"></span> 50일선</span>
-            <span class="flex items-center gap-1 text-purple-700"><span class="w-2.5 h-0.5 bg-purple-500 inline-block rounded"></span> 200일선</span>
+            <span class="flex items-center gap-1 text-sky-700"><span class="w-2.5 h-0.5 bg-sky-500 inline-block rounded"></span> <span id="legendSma50">50일선</span></span>
+            <span class="flex items-center gap-1 text-purple-700"><span class="w-2.5 h-0.5 bg-purple-500 inline-block rounded"></span> <span id="legendSma200">200일선</span></span>
           </div>
         </div>
         <div class="h-44 sm:h-52 w-full">
@@ -211,10 +201,9 @@
     </section>
 
     <!-- 2. 오늘 밤 매수·매도 주문표 -->
-    <section class="chiikawa-card rounded-3xl p-4 sm:p-6 space-y-4">
-      <div class="border-b-2 border-pink-100 pb-3.5">
+    <section class="chiikawa-card rounded-3xl p-4 sm:p-6 space-y-3">
+      <div class="border-b-2 border-pink-100 pb-3">
         <h2 class="text-lg font-cute text-[#4a3728]">오늘 밤 매수·매도 주문표</h2>
-        <p id="orderSheetHeaderDesc" class="text-xs text-amber-800/70 mt-0.5">1회차 배정 한도와 가용 현금(3% 예비금 제외) 범위 내에서 자동 산출됩니다.</p>
       </div>
 
       <div id="ordersContainer" class="space-y-3"></div>
@@ -504,14 +493,8 @@
         }
       }
 
-      const sma50Diff = sma50 > 0 ? ((close - sma50) / sma50) * 100 : 0;
-      document.getElementById("outSma50").textContent = `$${sma50.toFixed(2)}`;
-      document.getElementById("subSma50").textContent = `이격도 ${sma50Diff >= 0 ? "+" : ""}${sma50Diff.toFixed(1)}%`;
-      document.getElementById("subSma50").className = `text-[11px] font-mono font-semibold block mt-0.5 ${sma50Diff >= 0 ? "text-emerald-700" : "text-rose-600"}`;
-
-      document.getElementById("outSma200").textContent = `$${sma200.toFixed(2)}`;
-      document.getElementById("subSma200").textContent = `이격도 ${sma200Diff >= 0 ? "+" : ""}${sma200Diff.toFixed(1)}%`;
-      document.getElementById("subSma200").className = `text-[11px] font-mono font-semibold block mt-0.5 ${sma200Diff >= 0 ? "text-emerald-700" : "text-rose-600"}`;
+      document.getElementById("legendSma50").textContent = `50일선 $${sma50.toFixed(2)}`;
+      document.getElementById("legendSma200").textContent = `200일선 $${sma200.toFixed(2)}`;
 
       // Render Orders
       const container = document.getElementById("ordersContainer");
@@ -527,15 +510,12 @@
           : "border-pink-200 bg-pink-50/55";
 
         const card = document.createElement("div");
-        card.className = `rounded-2xl p-4 border-2 ${borderClass} flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition hover:shadow-md`;
+        card.className = `rounded-2xl p-3.5 sm:p-4 border-2 ${borderClass} flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition hover:shadow-md`;
 
         card.innerHTML = `
-          <div class="space-y-1 flex-1 min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${o.badgeColor}">${o.badge}</span>
-              <h3 class="text-sm font-extrabold text-[#4a3728]">${o.title}</h3>
-            </div>
-            <p class="text-xs text-amber-900/70">${o.reason}</p>
+          <div class="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${o.badgeColor}">${o.badge}</span>
+            <h3 class="text-sm font-extrabold text-[#4a3728]">${o.title}</h3>
           </div>
           <div class="grid grid-cols-2 gap-3 lg:flex lg:items-center lg:gap-6 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0 shrink-0 w-full lg:w-auto">
             <div class="text-left lg:text-right">
