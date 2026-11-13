@@ -118,7 +118,7 @@
         <div class="space-y-1">
           <label for="inQty" class="block text-xs font-bold text-[#6b5344]">보유 주식수</label>
           <div class="relative">
-            <input type="number" inputmode="numeric" id="inQty" value="972" step="1" min="0" class="field-input w-full rounded-2xl pl-3 pr-8 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
+            <input type="number" inputmode="numeric" id="inQty" value="971" step="1" min="0" class="field-input w-full rounded-2xl pl-3 pr-8 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-800/60 text-xs font-bold">주</span>
           </div>
           <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">미보유 시 0 입력</span>
@@ -128,7 +128,7 @@
           <label for="inAvgPrice" class="block text-xs font-bold text-[#6b5344]">내 평단가</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 font-mono font-bold">$</span>
-            <input type="number" inputmode="decimal" id="inAvgPrice" value="128.34" step="0.01" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
+            <input type="number" inputmode="decimal" id="inAvgPrice" value="99.23" step="0.01" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
           </div>
           <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">증권사 평균 매입단가</span>
         </div>
@@ -146,7 +146,7 @@
           <label for="inCash" class="block text-xs font-bold text-amber-800">남은 현금 잔고</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 font-mono font-bold">$</span>
-            <input type="number" inputmode="decimal" id="inCash" value="3659.95" step="10" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold text-amber-800 border-amber-200 bg-amber-50/40">
+            <input type="number" inputmode="decimal" id="inCash" value="9856.35" step="10" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold text-amber-800 border-amber-200 bg-amber-50/40">
           </div>
           <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">주문 가능 예수금</span>
         </div>
@@ -284,7 +284,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "jw_v2_orders_state";
+    const STORAGE_KEY = "jw_v2_orders_state_v2";
     const LAST_200_CLOSES = [52.26, 49.62, 53.91, 54.61, 56.03, 55.34, 58.04, 60.71, 57.9, 63.44, 63.68, 61.56, 60.66, 64.92, 70.04, 70.42, 61.75, 65.16, 61.16, 53.16, 53.22, 61.71, 63.99, 63.3, 68.01, 63.06, 64.55, 64.31, 66.25, 65.19, 67.07, 65.82, 68.49, 71.81, 65.3, 62.73, 62.72, 53.38, 56.58, 54.76, 47.86, 53.29, 54.55, 56.05, 50.25, 50.69, 53.65, 54.91, 53.98, 54.81, 51.11, 53.0, 54.92, 57.0, 48.94, 46.58, 40.59, 47.88, 52.23, 52.72, 54.77, 56.51, 67.46, 71.93, 76.34, 80.51, 85.25, 85.9, 88.31, 94.62, 95.88, 98.03, 105.57, 112.7, 128.24, 123.31, 109.49, 117.89, 126.9, 130.31, 127.47, 144.07, 165.74, 152.0, 176.82, 190.3, 172.41, 184.12, 186.07, 164.07, 151.65, 151.79, 173.09, 178.27, 190.44, 225.64, 217.84, 224.48, 224.19, 226.88, 266.15, 280.36, 262.53, 182.42, 211.3, 201.55, 180.53, 223.84, 234.53, 272.32, 226.04, 233.71, 279.11, 300.57, 231.27, 229.42, 252.44, 215.46, 236.37, 266.54, 217.41, 181.35, 194.52, 165.17, 174.71, 192.32, 192.13, 165.26, 176.54, 165.44, 142.39, 135.38, 136.72, 158.44, 160.88, 157.4, 136.72, 128.07, 109.47, 91.93, 114.64, 114.64, 116.63, 139.81, 131.98, 132.24, 140.16, 129.91, 132.91, 142.07, 145.26, 144.86, 151.43, 129.02, 120.66, 122.13, 120.52, 111.09, 115.59, 116.52, 122.97, 111.27, 112.72, 105.84, 106.28, 106.67, 117.2, 123.19, 125.79, 115.68, 121.74, 101.06, 102.25, 103.9, 114.74, 123.59, 141.84, 151.95, 146.25, 146.33, 151.45, 142.29, 147.0, 147.86, 153.69, 163.71, 164.27, 164.26, 158.91, 142.52, 139.76, 128.4, 127.57, 110.54, 107.35, 93.67, 98.65, 97.55, 103.24, 82.11];
 
     let journalRecords = [];
