@@ -90,9 +90,6 @@
           <span class="sm:hidden">백테스트</span>
           <span class="hidden sm:inline">백테스트 대시보드</span>
         </a>
-        <button id="btnReset" type="button" class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 border-2 border-pink-200 transition cursor-pointer font-bold" title="기본값 초기화">
-          🔄
-        </button>
       </div>
     </div>
   </header>
@@ -749,18 +746,6 @@
       });
 
       document.getElementById("btnFetchLive").addEventListener("click", () => syncLivePrice(false));
-
-      document.getElementById("btnReset").addEventListener("click", () => {
-        document.getElementById("inQty").value = 972;
-        document.getElementById("inAvgPrice").value = 128.34;
-        document.getElementById("inPrice").value = 82.11;
-        document.getElementById("inSMA200").value = 122.98;
-        document.getElementById("inSMA50").value = 126.06;
-        document.getElementById("inCash").value = 3659.95;
-        calculateOrders(false);
-        syncLivePrice(true);
-        showToast("기본값으로 초기화되었어요.");
-      });
 
       document.getElementById("journalForm").addEventListener("submit", (e) => {
         e.preventDefault();
