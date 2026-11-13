@@ -80,26 +80,27 @@
             <h1 class="text-lg sm:text-xl font-cute text-[#4a3728] truncate">JW 실전 매매</h1>
             <span class="hidden sm:inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200">SOXL 16분할</span>
           </div>
-          <p class="text-[11px] text-amber-800/70 truncate">오늘 밤 주문표 · 토벌 매매일지 · 포근한 계좌 현황</p>
+          <p class="hidden sm:block text-[11px] text-amber-800/70 truncate">오늘 밤 주문표 · 토벌 매매일지 · 포근한 계좌 현황</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 text-xs shrink-0">
-        <a href="quantum_dashboard.html" class="flex items-center gap-1.5 bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3.5 py-2 rounded-2xl border-2 border-sky-200 transition">
+      <div class="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
+        <a href="quantum_dashboard.html" class="flex items-center gap-1 bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl border-2 border-sky-200 transition">
           <span>📈</span>
+          <span class="sm:hidden">백테스트</span>
           <span class="hidden sm:inline">백테스트 대시보드</span>
         </a>
-        <button id="btnReset" type="button" class="px-3 py-2 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 border-2 border-pink-200 transition cursor-pointer font-bold" title="기본값 초기화">
+        <button id="btnReset" type="button" class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 border-2 border-pink-200 transition cursor-pointer font-bold" title="기본값 초기화">
           🔄
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
 
     <!-- 1. 내 계좌 현재 상황 -->
-    <section class="chiikawa-card rounded-3xl p-5 sm:p-6 space-y-5">
+    <section class="chiikawa-card rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2.5 flex-wrap">
           <h2 class="text-base font-cute text-[#4a3728]">내 계좌 현재 상황</h2>
@@ -116,41 +117,41 @@
       </div>
 
       <!-- 4 Inputs -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div class="space-y-1.5">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+        <div class="space-y-1">
           <label for="inQty" class="block text-xs font-bold text-[#6b5344]">보유 주식수</label>
           <div class="relative">
-            <input type="number" id="inQty" value="972" step="1" min="0" class="field-input w-full rounded-2xl pl-3.5 pr-9 py-2.5 text-base font-mono font-bold">
-            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-amber-800/60 text-xs font-bold">주</span>
+            <input type="number" inputmode="numeric" id="inQty" value="972" step="1" min="0" class="field-input w-full rounded-2xl pl-3 pr-8 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-800/60 text-xs font-bold">주</span>
           </div>
-          <span class="text-[11px] text-amber-800/60 block pl-1">미보유 시 0 입력</span>
+          <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">미보유 시 0 입력</span>
         </div>
 
-        <div class="space-y-1.5">
+        <div class="space-y-1">
           <label for="inAvgPrice" class="block text-xs font-bold text-[#6b5344]">내 평단가</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-pink-400 font-mono font-bold">$</span>
-            <input type="number" id="inAvgPrice" value="128.34" step="0.01" min="0" class="field-input w-full rounded-2xl pl-8 pr-3.5 py-2.5 text-base font-mono font-bold">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 font-mono font-bold">$</span>
+            <input type="number" inputmode="decimal" id="inAvgPrice" value="128.34" step="0.01" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold">
           </div>
-          <span class="text-[11px] text-amber-800/60 block pl-1">증권사 평균 매입단가</span>
+          <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">증권사 평균 매입단가</span>
         </div>
 
-        <div class="space-y-1.5">
+        <div class="space-y-1">
           <label for="inPrice" class="block text-xs font-bold text-[#6b5344]">SOXL 현재 주가</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500 font-mono font-bold">$</span>
-            <input type="number" id="inPrice" value="82.11" step="0.01" min="0.01" class="field-input w-full rounded-2xl pl-8 pr-3.5 py-2.5 text-base font-mono font-bold text-emerald-700">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 font-mono font-bold">$</span>
+            <input type="number" inputmode="decimal" id="inPrice" value="82.11" step="0.01" min="0.01" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold text-emerald-700">
           </div>
           <span id="priceDiffSpan" class="text-[11px] text-rose-600 font-mono font-semibold block pl-1">평단 대비 -36.02%</span>
         </div>
 
-        <div class="space-y-1.5">
+        <div class="space-y-1">
           <label for="inCash" class="block text-xs font-bold text-amber-800">남은 현금 잔고</label>
           <div class="relative">
-            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 font-mono font-bold">$</span>
-            <input type="number" id="inCash" value="3659.95" step="10" min="0" class="field-input w-full rounded-2xl pl-8 pr-3.5 py-2.5 text-base font-mono font-bold text-amber-800 border-amber-200 bg-amber-50/40">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 font-mono font-bold">$</span>
+            <input type="number" inputmode="decimal" id="inCash" value="3659.95" step="10" min="0" class="field-input w-full rounded-2xl pl-7 pr-3 py-2 sm:py-2.5 text-sm sm:text-base font-mono font-bold text-amber-800 border-amber-200 bg-amber-50/40">
           </div>
-          <span class="text-[11px] text-amber-800/60 block pl-1">주문 가능 예수금</span>
+          <span class="hidden sm:block text-[11px] text-amber-800/60 pl-1">주문 가능 예수금</span>
         </div>
       </div>
 
@@ -272,14 +273,14 @@
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="border-b-2 border-pink-100 text-[#6b5344] text-[11px] bg-pink-50/70">
-              <th class="py-2.5 px-3 font-bold">날짜</th>
-              <th class="py-2.5 px-3 font-bold">구분</th>
-              <th class="py-2.5 px-3 font-bold">유형</th>
-              <th class="py-2.5 px-3 font-bold text-right">수량</th>
-              <th class="py-2.5 px-3 font-bold text-right">체결가</th>
-              <th class="py-2.5 px-3 font-bold text-right">거래대금</th>
-              <th class="py-2.5 px-3 font-bold">메모</th>
-              <th class="py-2.5 px-3 text-center font-bold">관리</th>
+              <th class="py-2.5 px-2.5 sm:px-3 font-bold">날짜</th>
+              <th class="py-2.5 px-2.5 sm:px-3 font-bold">구분</th>
+              <th class="hidden sm:table-cell py-2.5 px-3 font-bold">유형</th>
+              <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">수량</th>
+              <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">체결가</th>
+              <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">금액</th>
+              <th class="hidden sm:table-cell py-2.5 px-3 font-bold">메모</th>
+              <th class="py-2.5 px-2.5 sm:px-3 text-center font-bold">삭제</th>
             </tr>
           </thead>
           <tbody id="journalTableBody" class="divide-y divide-pink-100/80 font-mono">
@@ -551,22 +552,24 @@
             </div>
             <p class="text-xs text-amber-900/70">${o.reason}</p>
           </div>
-          <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 lg:gap-5 shrink-0">
-            <div class="text-left sm:text-right">
-              <span class="text-[10px] text-amber-800/60 font-bold block">주문 단가</span>
-              <span class="text-sm font-mono font-bold text-[#4a3728]">${o.priceStr}</span>
+          <div class="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-5 shrink-0 w-full lg:w-auto">
+            <div class="grid grid-cols-3 gap-2 lg:flex lg:items-center lg:gap-5 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0">
+              <div class="text-left lg:text-right">
+                <span class="text-[10px] text-amber-800/60 font-bold block">주문 단가</span>
+                <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.priceStr}</span>
+              </div>
+              <div class="text-center lg:text-right lg:min-w-[68px]">
+                <span class="text-[10px] text-amber-800/60 font-bold block">수량</span>
+                <span class="text-xs sm:text-sm font-mono font-extrabold ${isBuy ? "text-sky-700" : isWait ? "text-amber-700" : "text-pink-600"}">${o.qtyStr}</span>
+              </div>
+              <div class="text-right lg:min-w-[88px]">
+                <span class="text-[10px] text-amber-800/60 font-bold block">예상 금액</span>
+                <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.amountStr}</span>
+              </div>
             </div>
-            <div class="text-left sm:text-right min-w-[68px]">
-              <span class="text-[10px] text-amber-800/60 font-bold block">수량</span>
-              <span class="text-sm font-mono font-extrabold ${isBuy ? "text-sky-700" : isWait ? "text-amber-700" : "text-pink-600"}">${o.qtyStr}</span>
-            </div>
-            <div class="text-left sm:text-right min-w-[88px]">
-              <span class="text-[10px] text-amber-800/60 font-bold block">예상 금액</span>
-              <span class="text-sm font-mono font-bold text-[#4a3728]">${o.amountStr}</span>
-            </div>
-            <div class="flex items-center gap-1.5">
+            <div class="grid grid-cols-2 lg:flex items-center gap-2">
               ${journalBtnHtml}
-              <button type="button" class="btn-copy-order px-3 py-1.5 rounded-xl bg-white hover:bg-pink-100 text-[#4a3728] border border-pink-200 text-xs font-bold transition cursor-pointer">복사</button>
+              <button type="button" class="btn-copy-order px-3 py-2 lg:py-1.5 rounded-xl bg-white hover:bg-pink-100 text-[#4a3728] border border-pink-200 text-xs font-bold transition cursor-pointer ${isWait ? "col-span-2" : ""}">복사</button>
             </div>
           </div>
         `;
@@ -619,18 +622,18 @@
         const tr = document.createElement("tr");
         tr.className = "hover:bg-pink-50/50 transition";
         tr.innerHTML = `
-          <td class="py-2.5 px-3 text-[#4a3728]">${r.date || "-"}</td>
-          <td class="py-2.5 px-3">
+          <td class="py-2.5 px-2.5 sm:px-3 text-[#4a3728] whitespace-nowrap">${(r.date || "-").slice(2)}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isBuy ? "bg-sky-100 text-sky-800 border border-sky-200" : "bg-pink-100 text-pink-800 border border-pink-200"}">
               ${isBuy ? "매수" : "매도"}
             </span>
           </td>
-          <td class="py-2.5 px-3 text-[#6b5344] font-sans font-semibold">${r.orderType || "-"}</td>
-          <td class="py-2.5 px-3 text-right font-bold text-[#4a3728]">${Number(r.qty).toLocaleString()}주</td>
-          <td class="py-2.5 px-3 text-right text-[#6b5344]">$${Number(r.price).toFixed(2)}</td>
-          <td class="py-2.5 px-3 text-right font-bold ${isBuy ? "text-sky-700" : "text-pink-600"}">$${amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td class="py-2.5 px-3 text-amber-900/70 font-sans max-w-[200px] truncate">${r.note || ""}</td>
-          <td class="py-2.5 px-3 text-center">
+          <td class="hidden sm:table-cell py-2.5 px-3 text-[#6b5344] font-sans font-semibold">${r.orderType || "-"}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-right font-bold text-[#4a3728] whitespace-nowrap">${Number(r.qty).toLocaleString()}주</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-right text-[#6b5344] whitespace-nowrap">$${Number(r.price).toFixed(2)}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-right font-bold whitespace-nowrap ${isBuy ? "text-sky-700" : "text-pink-600"}">$${Math.round(amt).toLocaleString()}</td>
+          <td class="hidden sm:table-cell py-2.5 px-3 text-amber-900/70 font-sans max-w-[200px] truncate">${r.note || ""}</td>
+          <td class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">
             <button type="button" class="btn-del-row text-rose-500 hover:text-rose-700 text-xs font-sans font-bold transition cursor-pointer" data-idx="${idx}">삭제</button>
           </td>
         `;

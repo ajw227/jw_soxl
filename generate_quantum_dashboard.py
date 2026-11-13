@@ -76,24 +76,25 @@ def main():
 
   <!-- Header -->
   <header class="border-b border-slate-800/80 bg-slate-950/80 sticky top-0 z-50 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-400 flex items-center justify-center text-lg font-black shadow-lg shadow-indigo-500/25">⚡</span>
-        <div>
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-400 flex items-center justify-center text-base sm:text-lg font-black shadow-lg shadow-indigo-500/25 shrink-0">⚡</span>
+        <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">JW 퀀트 히스테리시스 + 수학 퀀트 대시보드</h1>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Mathematix v2.5</span>
-            <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">과열익절(D200≥1.6) & 바닥손절차단(Z50&lt;-1.5)</span>
+            <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white truncate">JW 퀀트 백테스트 대시보드</h1>
+            <span class="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">Mathematix v2.5</span>
+            <span class="hidden lg:inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">과열익절(D200≥1.6) & 바닥손절차단(Z50&lt;-1.5)</span>
           </div>
-          <p class="text-[11px] text-slate-400">극단 과매도 바닥 손절 차단 + 200 SMA 버블 이격도 30% 분할 익절 수학 모델 실시간 백테스트</p>
+          <p class="hidden sm:block text-[11px] text-slate-400 truncate">극단 과매도 바닥 손절 차단 + 200 SMA 버블 이격도 30% 분할 익절 수학 모델 실시간 백테스트</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs">
-        <a href="orders.html" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg transition shadow-sm">
+      <div class="flex items-center gap-2 text-xs shrink-0">
+        <a href="orders.html" class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition shadow-sm">
           <span>📋</span>
-          <span>실전 주문표</span>
+          <span class="sm:hidden">주문표</span>
+          <span class="hidden sm:inline">실전 주문표</span>
         </a>
-        <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">
+        <div class="hidden sm:flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>자산: <strong>SOXL 1D</strong></span>
         </div>
@@ -101,42 +102,44 @@ def main():
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
 
     <!-- Control Bar: Period Selection & Capital -->
-    <div class="glass-panel rounded-2xl p-5 space-y-4 shadow-xl">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-xl">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4">
         
         <!-- Preset Buttons -->
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold text-slate-400 mr-1">⚡ 빠른 기간:</span>
-          <button class="btn-preset active px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2026-01-02', 'latest', this)">2026 (올해 YTD)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2025-01-01', '2025-12-31', this)">2025 (전년도)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2025-01-01', 'latest', this)">최근 2년 (2025~2026)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2024-01-01', '2024-12-31', this)">2024 (롤러코스터)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2022-01-01', '2022-12-31', this)">2022 (대폭락장)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2020-01-01', 'latest', this)">최근 7년 (2020~2026)</button>
-          <button class="btn-preset px-3 py-1.5 rounded-lg text-xs" onclick="setPreset('2010-03-11', 'latest', this)">16년 전체 (2010~2026)</button>
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span class="w-full sm:w-auto text-[11px] sm:text-xs font-semibold text-slate-400 mr-1">⚡ 빠른 기간:</span>
+          <button class="btn-preset active px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2026-01-02', 'latest', this)">2026 (YTD)</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2025-01-01', '2025-12-31', this)">2025</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2025-01-01', 'latest', this)">최근 2년</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2024-01-01', '2024-12-31', this)">2024</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2022-01-01', '2022-12-31', this)">2022 폭락</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2020-01-01', 'latest', this)">최근 7년</button>
+          <button class="btn-preset px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs" onclick="setPreset('2010-03-11', 'latest', this)">16년 전체</button>
         </div>
 
         <!-- Custom Date Range & Capital Inputs -->
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-1.5">
-            <span class="text-xs text-slate-400">기간:</span>
-            <input type="date" id="inStartDate" value="2026-01-02" class="bg-transparent text-xs text-white font-mono focus:outline-none">
+        <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 sm:gap-3">
+          <div class="flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 sm:py-1.5 w-full sm:w-auto">
+            <span class="text-[11px] sm:text-xs text-slate-400 shrink-0">기간:</span>
+            <input type="date" id="inStartDate" value="2026-01-02" class="bg-transparent text-[11px] sm:text-xs text-white font-mono focus:outline-none min-w-0">
             <span class="text-slate-500 text-xs">~</span>
-            <input type="date" id="inEndDate" value="2026-11-02" class="bg-transparent text-xs text-white font-mono focus:outline-none">
+            <input type="date" id="inEndDate" value="2026-11-02" class="bg-transparent text-[11px] sm:text-xs text-white font-mono focus:outline-none min-w-0">
           </div>
 
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-1.5">
-            <span class="text-xs text-slate-400">시작 원금:</span>
-            <span class="text-xs text-slate-400">$</span>
-            <input type="number" id="inCapital" value="10000" step="1000" class="w-20 bg-transparent text-xs text-white font-mono focus:outline-none">
-          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 sm:py-1.5 flex-1 sm:flex-initial">
+              <span class="text-[11px] sm:text-xs text-slate-400 shrink-0">원금:</span>
+              <span class="text-xs text-slate-400">$</span>
+              <input type="number" inputmode="numeric" id="inCapital" value="10000" step="1000" class="w-full sm:w-20 bg-transparent text-xs text-white font-mono focus:outline-none">
+            </div>
 
-          <button onclick="applyFilters()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition">
-            🚀 백테스트 실행
-          </button>
+            <button onclick="applyFilters()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition shrink-0">
+              🚀 실행
+            </button>
+          </div>
         </div>
 
       </div>
@@ -184,41 +187,41 @@ def main():
     <!-- Charts Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Equity Chart -->
-      <div class="lg:col-span-2 glass-panel rounded-2xl p-5 space-y-3">
-        <div class="flex items-center justify-between">
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 sm:p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <h2 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
               <span>📈 자산 성장 곡선 (Equity Curve)</span>
-              <span class="text-[10px] text-slate-400 font-normal">전략 vs SOXL 단순보유</span>
+              <span class="hidden sm:inline text-[10px] text-slate-400 font-normal">전략 vs SOXL 단순보유</span>
             </h2>
           </div>
-          <div class="flex items-center gap-3 text-xs font-mono">
+          <div class="flex items-center gap-3 text-[11px] sm:text-xs font-mono">
             <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-indigo-500 rounded"></span> JW 퀀트</span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-slate-500 rounded"></span> SOXL B&H</span>
           </div>
         </div>
-        <div class="h-72 w-full">
+        <div class="h-56 sm:h-72 w-full">
           <canvas id="chartEquity"></canvas>
         </div>
       </div>
 
       <!-- Asset Allocation Breakdown Chart -->
-      <div class="glass-panel rounded-2xl p-5 space-y-3">
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 space-y-3">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-bold text-white">💼 포트폴리오 자산 구성 (%)</h2>
+          <h2 class="text-xs sm:text-sm font-bold text-white">💼 포트폴리오 자산 구성 (%)</h2>
           <span class="text-[10px] text-slate-400">현금 vs 앵커 vs 그리드</span>
         </div>
-        <div class="h-72 w-full">
+        <div class="h-56 sm:h-72 w-full">
           <canvas id="chartAllocation"></canvas>
         </div>
       </div>
     </div>
 
     <!-- Details Section with Tabs -->
-    <div class="glass-panel rounded-2xl p-5 space-y-4">
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
       <div class="sticky top-16 z-30 bg-slate-900/95 backdrop-blur-md pb-3 pt-1 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <!-- Tabs -->
-        <div class="flex items-center gap-6 text-sm">
+        <div class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm overflow-x-auto whitespace-nowrap pb-1 sm:pb-0">
           <button id="tabBtn1" class="tab-btn active pb-2 font-medium transition" onclick="switchTab(1)">
             💰 매도 실현 손익 장부 (<span id="countSellTrades">0</span>건)
           </button>
