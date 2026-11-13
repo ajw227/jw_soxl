@@ -198,15 +198,10 @@
     </section>
 
     <!-- 2. 오늘 밤 매수·매도 주문표 -->
-    <section class="chiikawa-card rounded-3xl p-5 sm:p-6 space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-pink-100 pb-3.5">
-        <div>
-          <h2 class="text-lg font-cute text-[#4a3728]">오늘 밤 매수·매도 주문표</h2>
-          <p id="orderSheetHeaderDesc" class="text-xs text-amber-800/70 mt-0.5">1회차 배정 한도와 가용 현금(3% 예비금 제외) 범위 내에서 자동 산출됩니다.</p>
-        </div>
-        <button id="btnCopyAll" type="button" class="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-pink-400 hover:bg-pink-500 text-white font-bold text-xs transition shadow-sm cursor-pointer">
-          <span>📋</span> <span>전체 주문 복사</span>
-        </button>
+    <section class="chiikawa-card rounded-3xl p-4 sm:p-6 space-y-4">
+      <div class="border-b-2 border-pink-100 pb-3.5">
+        <h2 class="text-lg font-cute text-[#4a3728]">오늘 밤 매수·매도 주문표</h2>
+        <p id="orderSheetHeaderDesc" class="text-xs text-amber-800/70 mt-0.5">1회차 배정 한도와 가용 현금(3% 예비금 제외) 범위 내에서 자동 산출됩니다.</p>
       </div>
 
       <div id="ordersContainer" class="space-y-3"></div>
@@ -231,7 +226,7 @@
       </div>
 
       <!-- Journal Entry Form -->
-      <form id="journalForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5 items-end">
+      <form id="journalForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 items-end">
         <div>
           <label for="jDate" class="block text-[11px] font-bold text-[#6b5344] mb-1">체결일</label>
           <input type="date" id="jDate" required class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-mono font-bold">
@@ -244,24 +239,16 @@
           </select>
         </div>
         <div>
-          <label for="jOrderType" class="block text-[11px] font-bold text-[#6b5344] mb-1">주문유형</label>
-          <select id="jOrderType" class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-bold">
-            <option value="LOC">LOC</option>
-            <option value="지정가">지정가</option>
-            <option value="시장가">시장가</option>
-          </select>
-        </div>
-        <div>
           <label for="jQty" class="block text-[11px] font-bold text-[#6b5344] mb-1">수량 (주)</label>
-          <input type="number" id="jQty" min="1" step="1" placeholder="14" required class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-mono font-bold">
+          <input type="number" inputmode="numeric" id="jQty" min="1" step="1" placeholder="14" required class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-mono font-bold">
         </div>
         <div>
           <label for="jPrice" class="block text-[11px] font-bold text-[#6b5344] mb-1">체결가 ($)</label>
-          <input type="number" id="jPrice" min="0.01" step="0.01" placeholder="65.53" required class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-mono font-bold">
+          <input type="number" inputmode="decimal" id="jPrice" min="0.01" step="0.01" placeholder="65.53" required class="field-input w-full rounded-xl px-2.5 py-2 text-xs font-mono font-bold">
         </div>
-        <div>
+        <div class="col-span-2 sm:col-span-1">
           <label for="jNote" class="block text-[11px] font-bold text-[#6b5344] mb-1">메모</label>
-          <input type="text" id="jNote" placeholder="예: 16분할 LOC" class="field-input w-full rounded-xl px-2.5 py-2 text-xs">
+          <input type="text" id="jNote" placeholder="예: 16분할 매수" class="field-input w-full rounded-xl px-2.5 py-2 text-xs">
         </div>
         <button type="submit" class="col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl bg-emerald-400 hover:bg-emerald-500 text-white font-extrabold text-xs transition shadow-sm cursor-pointer">
           + 기록 추가
@@ -275,7 +262,6 @@
             <tr class="border-b-2 border-pink-100 text-[#6b5344] text-[11px] bg-pink-50/70">
               <th class="py-2.5 px-2.5 sm:px-3 font-bold">날짜</th>
               <th class="py-2.5 px-2.5 sm:px-3 font-bold">구분</th>
-              <th class="hidden sm:table-cell py-2.5 px-3 font-bold">유형</th>
               <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">수량</th>
               <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">체결가</th>
               <th class="py-2.5 px-2.5 sm:px-3 font-bold text-right">금액</th>
@@ -285,7 +271,7 @@
           </thead>
           <tbody id="journalTableBody" class="divide-y divide-pink-100/80 font-mono">
             <tr>
-              <td colspan="8" class="py-8 text-center text-amber-800/60 font-sans">기록된 매매일지가 없습니다. 위 입력창이나 주문표의 '일지 기록' 버튼을 눌러 추가하세요.</td>
+              <td colspan="7" class="py-8 text-center text-amber-800/60 font-sans">기록된 매매일지가 없습니다. 위 입력창에서 추가하세요.</td>
             </tr>
           </tbody>
         </table>
@@ -314,20 +300,6 @@
       window._toastTimer = setTimeout(() => {
         toast.classList.add("translate-y-20", "opacity-0");
       }, 2600);
-    }
-
-    function copyToClipboard(text, msg) {
-      navigator.clipboard.writeText(text).then(() => showToast(msg));
-    }
-
-    function prefillJournalFromOrder(side, orderType, qty, price, note) {
-      document.getElementById("jSide").value = side;
-      document.getElementById("jOrderType").value = orderType;
-      document.getElementById("jQty").value = qty;
-      document.getElementById("jPrice").value = price;
-      document.getElementById("jNote").value = note;
-      document.getElementById("journalForm").scrollIntoView({ behavior: "smooth", block: "center" });
-      showToast("매매일지 입력칸에 주문 내역을 채웠어요!");
     }
 
     function calculateOrders(autoRecalcSMA = false) {
@@ -540,10 +512,6 @@
         const card = document.createElement("div");
         card.className = `rounded-2xl p-4 border-2 ${borderClass} flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition hover:shadow-md`;
 
-        const journalBtnHtml = !isWait
-          ? `<button type="button" class="btn-log-order px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold transition cursor-pointer">일지 기록</button>`
-          : "";
-
         card.innerHTML = `
           <div class="space-y-1 flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
@@ -552,46 +520,24 @@
             </div>
             <p class="text-xs text-amber-900/70">${o.reason}</p>
           </div>
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-5 shrink-0 w-full lg:w-auto">
-            <div class="grid grid-cols-3 gap-2 lg:flex lg:items-center lg:gap-5 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0">
-              <div class="text-left lg:text-right">
-                <span class="text-[10px] text-amber-800/60 font-bold block">주문 단가</span>
-                <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.priceStr}</span>
-              </div>
-              <div class="text-center lg:text-right lg:min-w-[68px]">
-                <span class="text-[10px] text-amber-800/60 font-bold block">수량</span>
-                <span class="text-xs sm:text-sm font-mono font-extrabold ${isBuy ? "text-sky-700" : isWait ? "text-amber-700" : "text-pink-600"}">${o.qtyStr}</span>
-              </div>
-              <div class="text-right lg:min-w-[88px]">
-                <span class="text-[10px] text-amber-800/60 font-bold block">예상 금액</span>
-                <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.amountStr}</span>
-              </div>
+          <div class="grid grid-cols-3 gap-2 lg:flex lg:items-center lg:gap-5 bg-white/60 lg:bg-transparent rounded-xl p-2.5 lg:p-0 border border-pink-100/80 lg:border-0 shrink-0 w-full lg:w-auto">
+            <div class="text-left lg:text-right">
+              <span class="text-[10px] text-amber-800/60 font-bold block">주문 단가</span>
+              <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.priceStr}</span>
             </div>
-            <div class="grid grid-cols-2 lg:flex items-center gap-2">
-              ${journalBtnHtml}
-              <button type="button" class="btn-copy-order px-3 py-2 lg:py-1.5 rounded-xl bg-white hover:bg-pink-100 text-[#4a3728] border border-pink-200 text-xs font-bold transition cursor-pointer ${isWait ? "col-span-2" : ""}">복사</button>
+            <div class="text-center lg:text-right lg:min-w-[68px]">
+              <span class="text-[10px] text-amber-800/60 font-bold block">수량</span>
+              <span class="text-xs sm:text-sm font-mono font-extrabold ${isBuy ? "text-sky-700" : isWait ? "text-amber-700" : "text-pink-600"}">${o.qtyStr}</span>
+            </div>
+            <div class="text-right lg:min-w-[88px]">
+              <span class="text-[10px] text-amber-800/60 font-bold block">예상 금액</span>
+              <span class="text-xs sm:text-sm font-mono font-bold text-[#4a3728]">${o.amountStr}</span>
             </div>
           </div>
         `;
 
-        card.querySelector(".btn-copy-order").addEventListener("click", () => {
-          copyToClipboard(o.copyText, "주문이 복사되었어요!");
-        });
-
-        const logBtn = card.querySelector(".btn-log-order");
-        if (logBtn) {
-          logBtn.addEventListener("click", () => {
-            prefillJournalFromOrder(o.side, o.orderType, o.rawQty, o.rawPrice, o.title);
-          });
-        }
-
         container.appendChild(card);
       });
-
-      document.getElementById("btnCopyAll").onclick = () => {
-        const allText = orders.map(o => o.copyText).join("\n");
-        copyToClipboard(allText, "전체 주문표가 복사되었어요!");
-      };
     }
 
     // =========================================================================
@@ -611,7 +557,7 @@
       summary.textContent = `${journalRecords.length}건 · 매수 $${Math.round(totalBuy).toLocaleString()} / 매도 $${Math.round(totalSell).toLocaleString()}`;
 
       if (journalRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-amber-800/60 font-sans">기록된 매매일지가 없습니다. 위 입력창이나 주문표의 '일지 기록' 버튼을 눌러 추가하세요.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-amber-800/60 font-sans">기록된 매매일지가 없습니다. 위 입력창에서 추가하세요.</td></tr>`;
         return;
       }
 
@@ -628,7 +574,6 @@
               ${isBuy ? "매수" : "매도"}
             </span>
           </td>
-          <td class="hidden sm:table-cell py-2.5 px-3 text-[#6b5344] font-sans font-semibold">${r.orderType || "-"}</td>
           <td class="py-2.5 px-2.5 sm:px-3 text-right font-bold text-[#4a3728] whitespace-nowrap">${Number(r.qty).toLocaleString()}주</td>
           <td class="py-2.5 px-2.5 sm:px-3 text-right text-[#6b5344] whitespace-nowrap">$${Number(r.price).toFixed(2)}</td>
           <td class="py-2.5 px-2.5 sm:px-3 text-right font-bold whitespace-nowrap ${isBuy ? "text-sky-700" : "text-pink-600"}">$${Math.round(amt).toLocaleString()}</td>
@@ -825,7 +770,7 @@
         addJournalRow({
           date: document.getElementById("jDate").value,
           side: document.getElementById("jSide").value,
-          orderType: document.getElementById("jOrderType").value,
+          orderType: "",
           qty,
           price,
           note: document.getElementById("jNote").value.trim()
