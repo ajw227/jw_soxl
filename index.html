@@ -124,6 +124,10 @@
           <span id="regimeIndicatorBadge" class="text-[11px] font-bold px-3 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
             📉 하락장 역배열
           </span>
+          <div class="inline-flex rounded-xl bg-amber-50 p-0.5 border border-amber-200">
+            <button id="btnModeNormal" type="button" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer bg-white text-[#4a3728] shadow-sm">보통 모드</button>
+            <button id="btnModeBear" type="button" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer text-amber-800/70">하락장 모드</button>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <span id="lastUpdatedSpan" class="text-[11px] text-amber-800/70 font-mono">시세 대기 중</span>
@@ -317,11 +321,35 @@
     let journalScopeAll = false;
     let accountsState = {
       activeId: "acc-1",
-      accounts: [{ id: "acc-1", name: "메인 계좌", qty: 971, avgPrice: 99.23, cash: 9856.35 }]
+      accounts: [{ id: "acc-1", name: "메인 계좌", qty: 971, avgPrice: 99.23, cash: 9856.35, mode: "normal" }]
     };
 
     function getActiveAccount() {
       return accountsState.accounts.find(a => a.id === accountsState.activeId) || accountsState.accounts[0];
+    }
+
+    function renderModeToggle() {
+      const acc = getActiveAccount();
+      const isBear = acc && acc.mode === "bear";
+      const btnN = document.getElementById("btnModeNormal");
+      const btnB = document.getElementById("btnModeBear");
+      if (!btnN || !btnB) return;
+      btnN.className = !isBear
+        ? "px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer bg-white text-[#4a3728] shadow-sm"
+        : "px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer text-amber-800/70 hover:text-[#4a3728]";
+      btnB.className = isBear
+        ? "px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer bg-rose-500 text-white shadow-sm"
+        : "px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition cursor-pointer text-amber-800/70 hover:text-rose-700";
+    }
+
+    function setAccountMode(mode) {
+      const acc = getActiveAccount();
+      if (!acc || acc.mode === mode) return;
+      acc.mode = mode;
+      saveAccounts();
+      renderModeToggle();
+      calculateOrders(false);
+      showToast(mode === "bear" ? "하락장 모드(12분할 · 목표 +18% · 비중 100%) 적용" : "보통 모드(16분할 · 목표 +22% · 비중 50%) 적용");
     }
 
     function saveAccounts() {
@@ -360,6 +388,7 @@
       document.getElementById("inQty").value = acc.qty ?? 0;
       document.getElementById("inAvgPrice").value = acc.avgPrice ?? 0;
       document.getElementById("inCash").value = acc.cash ?? 0;
+      renderModeToggle();
     }
 
     function renderAccountBar() {
@@ -421,7 +450,8 @@
         name: name.trim(),
         qty: 0,
         avgPrice: 0,
-        cash: 0
+        cash: 0,
+        mode: "normal"
       };
       accountsState.accounts.push(newAcc);
       accountsState.activeId = newAcc.id;
@@ -534,8 +564,12 @@
       const vaultReserve = totalEquity * 0.03;
       const spendableCash = Math.max(0, cash - vaultReserve);
 
-      const gridSplit = 16;
-      const unitBudget = (capital * 0.5) / gridSplit;
+      const isBear = activeAcc && activeAcc.mode === "bear";
+      const gridSplit = isBear ? 12 : 16;
+      const gridShare = isBear ? 1.0 : 0.5;
+      const gridTarget = isBear ? 18.0 : 22.0;
+      const minStarRate = isBear ? 8.0 : 10.0;
+      const unitBudget = (capital * gridShare) / gridSplit;
 
       document.getElementById("outTotalEquity").textContent = `$${Math.round(totalEquity).toLocaleString()}`;
       document.getElementById("valCurrentCash").textContent = `$${cash.toFixed(2)}`;
@@ -577,11 +611,10 @@
         const baseStar = 0.5 * gridSplit;
         const ratio = baseStar > 0 ? Math.min(1.0, Math.max(0.0, iteration / baseStar)) : 0.0;
         const decayFactor = Math.pow(ratio, 1.5);
-        const gridTarget = 22.0;
         let starRate = iteration <= baseStar
           ? gridTarget * (1.0 - decayFactor)
           : -gridTarget * Math.pow((iteration - baseStar) / baseStar, 1.5);
-        if (isNaN(starRate) || starRate < 10.0) starRate = 10.0;
+        if (isNaN(starRate) || starRate < minStarRate) starRate = minStarRate;
 
         const priceStar = effectiveAvg * (1.0 + starRate / 100.0);
         const priceTarget = effectiveAvg * (1.0 + gridTarget / 100.0);
@@ -620,11 +653,11 @@
             rawPrice: priceTarget.toFixed(2),
             badge: "지정가 매도",
             badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
-            title: "목표가 대사이클 익절 (+22.0% · 75%)",
+            title: `목표가 대사이클 익절 (+${gridTarget.toFixed(1)}% · 75%)`,
             priceStr: `$${priceTarget.toFixed(2)} 이상`,
             qtyStr: `${plannedTargetQty.toLocaleString()} 주`,
             amountStr: `+$${recCash2.toLocaleString()}`,
-            reason: "목표 수익률(+22%) 도달 시 잔여 물량을 전량 익절합니다.",
+            reason: `목표 수익률(+${gridTarget.toFixed(0)}%) 도달 시 잔여 물량을 전량 익절합니다.`,
             copyText: `[SOXL 매도 지정가] $${priceTarget.toFixed(2)} / ${plannedTargetQty}주`
           });
         }
@@ -644,7 +677,7 @@
             rawPrice: close.toFixed(2),
             badge: "LOC 매수",
             badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
-            title: "정규 16분할 안전 매수",
+            title: isBear ? "하락장 12분할 집중 매수" : "정규 16분할 안전 매수",
             priceStr: `$${close.toFixed(2)} 이하`,
             qtyStr: `${buyQty.toLocaleString()} 주`,
             amountStr: `$${buyCost.toFixed(2)}`,
@@ -1021,6 +1054,8 @@
       document.getElementById("btnAddAccount").addEventListener("click", addAccount);
       document.getElementById("btnRenameAccount").addEventListener("click", renameAccount);
       document.getElementById("btnDeleteAccount").addEventListener("click", deleteAccount);
+      document.getElementById("btnModeNormal").addEventListener("click", () => setAccountMode("normal"));
+      document.getElementById("btnModeBear").addEventListener("click", () => setAccountMode("bear"));
 
       document.getElementById("btnToggleJournalScope").addEventListener("click", () => {
         journalScopeAll = !journalScopeAll;
