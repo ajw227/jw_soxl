@@ -349,7 +349,7 @@
       saveAccounts();
       renderModeToggle();
       calculateOrders(false);
-      showToast(mode === "bear" ? "하락장 모드(12분할 · 목표 +18% · 비중 100%) 적용" : "보통 모드(16분할 · 목표 +22% · 비중 50%) 적용");
+      showToast(mode === "bear" ? "하락장 모드(28분할 · 목표 +18% · 비중 70%) 적용" : "보통 모드(16분할 · 목표 +22% · 비중 50%) 적용");
     }
 
     function saveAccounts() {
@@ -565,10 +565,10 @@
       const spendableCash = Math.max(0, cash - vaultReserve);
 
       const isBear = activeAcc && activeAcc.mode === "bear";
-      const gridSplit = isBear ? 12 : 16;
-      const gridShare = isBear ? 1.0 : 0.5;
+      const gridSplit = isBear ? 28 : 16;
+      const gridShare = isBear ? 0.7 : 0.5;
       const gridTarget = isBear ? 18.0 : 22.0;
-      const minStarRate = isBear ? 8.0 : 10.0;
+      const minStarRate = isBear ? -20.0 : -20.0;
       const unitBudget = (capital * gridShare) / gridSplit;
 
       document.getElementById("outTotalEquity").textContent = `$${Math.round(totalEquity).toLocaleString()}`;
@@ -608,13 +608,10 @@
         const purchaseAmount = qty * effectiveAvg;
         const iteration = unitBudget > 0 ? (purchaseAmount / unitBudget) : 0;
 
-        const baseStar = 0.5 * gridSplit;
-        const ratio = baseStar > 0 ? Math.min(1.0, Math.max(0.0, iteration / baseStar)) : 0.0;
-        const decayFactor = Math.pow(ratio, 1.5);
-        let starRate = iteration <= baseStar
-          ? gridTarget * (1.0 - decayFactor)
-          : -gridTarget * Math.pow((iteration - baseStar) / baseStar, 1.5);
-        if (isNaN(starRate) || starRate < minStarRate) starRate = minStarRate;
+        const T = unitBudget > 0 ? (purchaseAmount / unitBudget) : 0;
+        let starRate = gridTarget * (1.0 - (2.0 * T) / gridSplit);
+        if (isNaN(starRate)) starRate = 0.0;
+        if (starRate < minStarRate) starRate = minStarRate;
 
         const priceStar = effectiveAvg * (1.0 + starRate / 100.0);
         const priceTarget = effectiveAvg * (1.0 + gridTarget / 100.0);
@@ -677,7 +674,7 @@
             rawPrice: close.toFixed(2),
             badge: "LOC 매수",
             badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
-            title: isBear ? "하락장 12분할 집중 매수" : "정규 16분할 안전 매수",
+            title: isBear ? "하락장 28분할 집중 매수" : "정규 16분할 안전 매수",
             priceStr: `$${close.toFixed(2)} 이하`,
             qtyStr: `${buyQty.toLocaleString()} 주`,
             amountStr: `$${buyCost.toFixed(2)}`,

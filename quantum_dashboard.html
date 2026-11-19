@@ -374,10 +374,22 @@
       let runnerAvgPrice = 0.0;
       let runnerPeak = 0.0;
 
-      const gridSplit = 14;
-      const gridTarget = 24.0;
-      let gridOrderUnit = (initialCapital * 0.5) / gridSplit;
-      let gridStartCash = cash * 0.5;
+      const bullAnchor = 0.50;
+      const bearGridCap = 0.70;
+      const bullSplit = 16;
+      const bearSplit = 28;
+      const bullTarget = 22.0;
+      const bearTarget = 18.0;
+
+      let gridSeed = initialCapital * (1.0 - bullAnchor);
+      let reverseMode = false;
+      let reverseFirstDay = false;
+      let cycleSplits = bullSplit;
+      let cycleTarget = bullTarget;
+      let bullStreak = 0;
+      let bearStreak = 0;
+      let smoothRegime = "MID";
+
       let cycles = 0;
       let overheatTrims = 0;
       let reversionGateBlocks = 0;
@@ -388,19 +400,29 @@
 
       for (let i = 0; i < bars.length; i++) {
         const [currDate, c, sma200, sma50, z50, disp200] = bars[i];
-        const totalEquity = cash + (anchorQty + gridQty + runnerQty) * c;
-
-        // 1. Hysteresis Anchor + Overheat Trim
-        let targetRatio = 0.15;
-        if (c >= sma200 * 1.02 && c >= sma50) {
-          targetRatio = 0.50;
-        } else if (c >= sma200 * 0.95) {
-          targetRatio = (anchorQty > 0) ? 0.30 : 0.0;
-        } else {
-          targetRatio = 0.15; // floor
+        let sma5 = c;
+        if (i >= 5) {
+          let s5 = 0.0;
+          for (let k = i - 5; k < i; k++) s5 += bars[k][1];
+          sma5 = s5 / 5.0;
         }
 
-        // [수학 1] 과열 분할 익절 (Overheat Trim): 200 SMA 대비 +60% 괴리 시 앵커 30% 현금화
+        const rawBull = c >= sma200 && c >= sma50;
+        const rawBear = c < sma200 * 0.95;
+        if (rawBull) { bullStreak++; bearStreak = 0; }
+        else if (rawBear) { bearStreak++; bullStreak = 0; }
+        else { bullStreak = 0; bearStreak = 0; }
+
+        if (bullStreak >= 2) smoothRegime = "BULL";
+        else if (bearStreak >= 2) smoothRegime = "BEAR";
+        else if (!rawBull && !rawBear) smoothRegime = "MID";
+
+        const isBull = smoothRegime === "BULL";
+        const isBear = smoothRegime === "BEAR";
+        const totalEquity = cash + (anchorQty + gridQty + runnerQty) * c;
+
+        // 1. Regime-Adaptive Anchor (2일 확인 + 과열 분할 익절)
+        let targetRatio = isBull ? bullAnchor : (!isBear && anchorQty > 0 ? bullAnchor * 0.5 : 0.0);
         if (disp200 >= 1.60 && anchorQty > 0) {
           targetRatio *= 0.70;
         }
@@ -408,8 +430,8 @@
         const targetVal = totalEquity * targetRatio;
         const currentVal = anchorQty * c;
 
-        if (targetVal > currentVal * 1.15) {
-          const diff = Math.min(targetVal - currentVal, totalEquity * 0.05); // 1일 최대 5% 스프레드 적립
+        if (targetVal > currentVal * 1.12) {
+          const diff = Math.min(targetVal - currentVal, totalEquity * 0.06);
           const bQty = Math.floor(diff / c);
           if (bQty > 0 && cash >= bQty * c) {
             const cost = bQty * c;
@@ -422,17 +444,17 @@
               reason: "앵커 점진 보충"
             });
           }
-        } else if (targetVal < currentVal * 0.85 && anchorQty > 0) {
-          const diff = currentVal - targetVal;
-          let sQty = Math.floor(diff / c);
-          sQty = Math.min(sQty, Math.floor(anchorQty * 0.30));
+        } else if (targetVal < currentVal * 0.88 && anchorQty > 0) {
+          let sQty = targetRatio === 0.0
+            ? Math.min(Math.floor(anchorQty * 0.35) + 1, anchorQty)
+            : Math.min(Math.floor((currentVal - targetVal) / c), Math.floor(anchorQty * 0.35));
           if (sQty > 0) {
             const proceeds = sQty * c;
             cash += proceeds;
             const pnl = (c - anchorAvgPrice) * sQty;
             const retPct = anchorAvgPrice > 0 ? ((c - anchorAvgPrice) / anchorAvgPrice) * 100.0 : 0.0;
             cumRealizedPnL += pnl;
-            const sellReason = disp200 >= 1.60 ? `앵커 과열 분할 익절 (이격도 ${disp200.toFixed(2)})` : "앵커 분할 축소 (휩소방지)";
+            const sellReason = disp200 >= 1.60 ? `앵커 과열 분할 익절 (이격도 ${disp200.toFixed(2)})` : (isBear ? "하락장 앵커 방어 현금화" : "앵커 분할 축소");
             if (disp200 >= 1.60) overheatTrims++;
             trades.push({
               date: currDate, side: "SELL", type: "ANCHOR", qty: sQty, price: c,
@@ -440,10 +462,11 @@
               reason: sellReason
             });
             anchorQty -= sQty;
+            if (anchorQty === 0) anchorAvgPrice = 0.0;
           }
         }
 
-        // 2. Runner Exit
+        // 2. Runner Trailing Exit (-6.5%)
         if (runnerQty > 0) {
           if (c > runnerPeak) runnerPeak = c;
           const dropPct = ((runnerPeak - c) / runnerPeak) * 100.0;
@@ -460,107 +483,188 @@
             });
             runnerQty = 0;
             runnerPeak = 0.0;
+            runnerAvgPrice = 0.0;
           }
         }
 
-        // 3. Grid Sells & Reversion Gate
-        if (gridQty > 0) {
-          const gainPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
-          const remPrincipal = Math.max(0.0, (initialCapital * 0.5) - (gridQty * gridAvgPrice));
-          const remPct = (remPrincipal / (initialCapital * 0.5)) * 100.0;
+        // 3. Compounding Grid + Cycle Lock + 5-day SMA Reverse Mode
+        const splits = cycleSplits;
+        const targetPct = cycleTarget;
+        const maxGridCap = totalEquity * (isBear ? bearGridCap : (1.0 - targetRatio));
+        const gridUnit = gridSeed / splits;
+        const investedGrid = gridQty * gridAvgPrice;
+        const T = gridUnit > 0 ? investedGrid / gridUnit : 0.0;
+        const availGridCash = Math.max(0.0, Math.min(cash, maxGridCap - investedGrid));
 
-          if (gainPct >= gridTarget) {
-            const proceeds = gridQty * c;
-            cash += proceeds;
-            const pnl = (c - gridAvgPrice) * gridQty;
-            cumRealizedPnL += pnl;
-            trades.push({
-              date: currDate, side: "SELL", type: "GRID", qty: gridQty, price: c,
-              costBasis: gridAvgPrice, pnl: pnl, retPct: gainPct, cumPnL: cumRealizedPnL,
-              reason: `그리드 목표 익절 (+${gainPct.toFixed(1)}%)`
-            });
-            const keepRunner = Math.floor(gridQty * 0.25);
-            gridQty = 0;
-            runnerQty = keepRunner;
-            runnerAvgPrice = gridAvgPrice;
-            runnerPeak = c;
-            cash -= runnerQty * c;
-            gridAvgPrice = 0.0;
-            cycles += 1;
-            gridOrderUnit = (cash * 0.5) / gridSplit;
-            gridStartCash = cash * 0.5;
-          } else if (remPct < 50.0) {
-            // [수학 2] 과매도 손절 차단 (Reversion Gate): Z-score < -1.5 극단 바닥 시 손절 차단
-            if (z50 < -1.5) {
-              reversionGateBlocks++;
+        if (!reverseMode) {
+          if (gridQty > 0) {
+            const starPct = targetPct * (1.0 - (2.0 * T) / splits);
+            const priceStar = gridAvgPrice * (1.0 + starPct / 100.0);
+            const priceTarget = gridAvgPrice * (1.0 + targetPct / 100.0);
+
+            if (c >= priceTarget) {
+              const proceeds = gridQty * c;
+              cash += proceeds;
+              const pnl = (c - gridAvgPrice) * gridQty;
+              const gainPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
+              cumRealizedPnL += pnl;
+              trades.push({
+                date: currDate, side: "SELL", type: "GRID", qty: gridQty, price: c,
+                costBasis: gridAvgPrice, pnl: pnl, retPct: gainPct, cumPnL: cumRealizedPnL,
+                reason: `그리드 목표 익절 (+${gainPct.toFixed(1)}%)`
+              });
+              const keepRunner = isBull ? Math.floor(gridQty * 0.20) : 0;
+              gridQty = 0;
+              gridAvgPrice = 0.0;
+              if (keepRunner > 0 && cash >= keepRunner * c) {
+                cash -= keepRunner * c;
+                runnerQty += keepRunner;
+                runnerAvgPrice = c;
+                runnerPeak = c;
+              }
+              cycles += 1;
+              gridSeed = (cash + (anchorQty + runnerQty) * c) * (isBear ? bearGridCap : (1.0 - bullAnchor));
             } else {
-              const qCut = Math.floor(gridQty * 0.25);
-              if (qCut > 0) {
-                const proceeds = qCut * c;
-                cash += proceeds;
-                const pnl = (c - gridAvgPrice) * qCut;
-                const retPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
-                cumRealizedPnL += pnl;
-                trades.push({
-                  date: currDate, side: "SELL", type: "GRID", qty: qCut, price: c,
-                  costBasis: gridAvgPrice, pnl: pnl, retPct: retPct, cumPnL: cumRealizedPnL,
-                  reason: `별률 쿼터 매도 (${retPct.toFixed(1)}%)`
-                });
-                gridQty -= qCut;
+              if (c >= priceStar) {
+                const qCut = Math.max(1, Math.floor(gridQty * 0.25));
+                if (qCut > 0) {
+                  const proceeds = qCut * c;
+                  cash += proceeds;
+                  const pnl = (c - gridAvgPrice) * qCut;
+                  const retPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
+                  cumRealizedPnL += pnl;
+                  trades.push({
+                    date: currDate, side: "SELL", type: "GRID", qty: qCut, price: c,
+                    costBasis: gridAvgPrice, pnl: pnl, retPct: retPct, cumPnL: cumRealizedPnL,
+                    reason: `별률 쿼터 매도 (${retPct >= 0 ? "+" : ""}${retPct.toFixed(1)}%)`
+                  });
+                  gridQty -= qCut;
+                  if (gridQty === 0) {
+                    gridAvgPrice = 0.0;
+                    cycles += 1;
+                    gridSeed = (cash + (anchorQty + runnerQty) * c) * (isBear ? bearGridCap : (1.0 - bullAnchor));
+                  }
+                }
+              }
+              const remT = splits - T;
+              if (remT <= 1.0 || availGridCash < c) {
+                reverseMode = true;
+                reverseFirstDay = true;
+                reversionGateBlocks++;
+              } else {
+                const dynUnit = Math.min(availGridCash, Math.max(gridUnit, availGridCash / Math.max(1.0, remT)));
+                if (T < splits / 2.0) {
+                  const half = dynUnit / 2.0;
+                  if (c <= gridAvgPrice) {
+                    const b1 = Math.floor(half / c);
+                    if (b1 > 0 && cash >= b1 * c) {
+                      const cost = b1 * c;
+                      cash -= cost;
+                      gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + b1);
+                      gridQty += b1;
+                      trades.push({
+                        date: currDate, side: "BUY", type: "GRID", qty: b1, price: c,
+                        costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
+                        reason: "평단 LOC 분할 매수"
+                      });
+                    }
+                  }
+                  if (c <= priceStar) {
+                    const b2 = Math.floor(half / c);
+                    if (b2 > 0 && cash >= b2 * c) {
+                      const cost = b2 * c;
+                      cash -= cost;
+                      gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + b2);
+                      gridQty += b2;
+                      trades.push({
+                        date: currDate, side: "BUY", type: "GRID", qty: b2, price: c,
+                        costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
+                        reason: "별률 LOC 분할 매수"
+                      });
+                    }
+                  }
+                } else if (c <= priceStar) {
+                  const b = Math.floor(dynUnit / c);
+                  if (b > 0 && cash >= b * c) {
+                    const cost = b * c;
+                    cash -= cost;
+                    gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + b);
+                    gridQty += b;
+                    trades.push({
+                      date: currDate, side: "BUY", type: "GRID", qty: b, price: c,
+                      costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
+                      reason: "후반 별률 LOC 매수"
+                    });
+                  }
+                }
               }
             }
-          }
-        }
-
-        // 4. Grid Buys
-        const effOrderUnit = gridOrderUnit;
-        const remPrincipal = Math.max(0.0, (initialCapital * 0.5) - (gridQty * gridAvgPrice));
-        const remPct = (remPrincipal / (initialCapital * 0.5)) * 100.0;
-
-        const valA = 1.0 + 0.05 / 2.0;
-        const valB = 1.0 - (0.05 / 2.0) * Math.pow(remPct / 100.0, 1.5);
-        const priceStar = gridAvgPrice > 0 ? gridAvgPrice * valA * valB : c;
-        const priceLarge = gridAvgPrice > 0 ? gridAvgPrice * 1.15 : c;
-
-        if (gridQty === 0 && runnerQty === 0) {
-          const qty = Math.floor(effOrderUnit / c);
-          if (qty > 0 && cash >= qty * c) {
-            const cost = qty * c;
-            cash -= cost;
-            gridQty = qty;
-            gridAvgPrice = c;
-            trades.push({
-              date: currDate, side: "BUY", type: "GRID", qty: qty, price: c,
-              costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
-              reason: "그리드 1회차 매수"
-            });
-          }
-        } else {
-          if (remPrincipal > 0) {
-            const budget = (remPct < 50) ? (effOrderUnit / 2) : Math.min(remPrincipal, effOrderUnit);
-            const starQty = priceStar > 0 ? Math.floor(budget / priceStar) : 0;
-            const largeQty = priceLarge > 0 ? Math.floor((effOrderUnit / 2) / priceLarge) : 0;
-
-            if (starQty > 0 && priceStar >= c && cash >= starQty * c) {
-              const cost = starQty * c;
+          } else {
+            cycleSplits = isBear ? bearSplit : bullSplit;
+            cycleTarget = isBear ? bearTarget : bullTarget;
+            gridSeed = totalEquity * (isBear ? bearGridCap : (1.0 - bullAnchor));
+            const b = Math.floor(Math.min(cash, gridSeed / cycleSplits) / c);
+            if (b > 0 && cash >= b * c) {
+              const cost = b * c;
               cash -= cost;
-              gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + starQty);
-              gridQty += starQty;
+              gridQty = b;
+              gridAvgPrice = c;
               trades.push({
-                date: currDate, side: "BUY", type: "GRID", qty: starQty, price: c,
+                date: currDate, side: "BUY", type: "GRID", qty: b, price: c,
                 costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
-                reason: "별률 분할 매수"
+                reason: isBear ? "하락장 28분할 1회차 매수" : "상승장 16분할 1회차 매수"
               });
             }
-            if (largeQty > 0 && priceLarge >= c && cash >= largeQty * c) {
-              const cost = largeQty * c;
-              cash -= cost;
-              gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + largeQty);
-              gridQty += largeQty;
+          }
+        } else {
+          const revDiv = isBear ? 12 : 10;
+          if (reverseFirstDay) {
+            if (gridQty > 0) {
+              const sq = Math.max(1, Math.floor(gridQty / revDiv));
+              const proceeds = sq * c;
+              cash += proceeds;
+              const pnl = (c - gridAvgPrice) * sq;
+              const retPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
+              cumRealizedPnL += pnl;
+              gridQty -= sq;
               trades.push({
-                date: currDate, side: "BUY", type: "GRID", qty: largeQty, price: c,
+                date: currDate, side: "SELL", type: "GRID", qty: sq, price: c,
+                costBasis: gridAvgPrice, pnl: pnl, retPct: retPct, cumPnL: cumRealizedPnL,
+                reason: "리버스 모드 첫날 방어 매도"
+              });
+            }
+            reverseFirstDay = false;
+          } else if (gridQty === 0 || (gridAvgPrice > 0 && c >= gridAvgPrice)) {
+            reverseMode = false;
+            if (gridQty === 0) {
+              gridAvgPrice = 0.0;
+              cycles += 1;
+              gridSeed = (cash + (anchorQty + runnerQty) * c) * (isBear ? bearGridCap : (1.0 - bullAnchor));
+            }
+          } else if (c > sma5 && gridQty > 0) {
+            const sq = Math.max(1, Math.floor(gridQty / revDiv));
+            const proceeds = sq * c;
+            cash += proceeds;
+            const pnl = (c - gridAvgPrice) * sq;
+            const retPct = ((c - gridAvgPrice) / gridAvgPrice) * 100.0;
+            cumRealizedPnL += pnl;
+            gridQty -= sq;
+            trades.push({
+              date: currDate, side: "SELL", type: "GRID", qty: sq, price: c,
+              costBasis: gridAvgPrice, pnl: pnl, retPct: retPct, cumPnL: cumRealizedPnL,
+              reason: "리버스 5일선 위 분할 매도"
+            });
+          } else if (c <= sma5 && cash > c && availGridCash > c) {
+            const b = Math.floor(Math.min(availGridCash, cash / 4.0) / c);
+            if (b > 0 && cash >= b * c) {
+              const cost = b * c;
+              cash -= cost;
+              gridAvgPrice = (gridAvgPrice * gridQty + cost) / (gridQty + b);
+              gridQty += b;
+              trades.push({
+                date: currDate, side: "BUY", type: "GRID", qty: b, price: c,
                 costBasis: gridAvgPrice, pnl: 0.0, retPct: 0.0, cumPnL: cumRealizedPnL,
-                reason: "장대양봉 추격 매수"
+                reason: "리버스 5일선 아래 쿼터 매수"
               });
             }
           }
@@ -568,7 +672,7 @@
 
         const totHolding = anchorQty + gridQty + runnerQty;
         const eq = cash + totHolding * c;
-        const totAvg = totHolding > 0 ? ((anchorQty * anchorAvgPrice) + (gridQty * gridAvgPrice)) / totHolding : 0.0;
+        const totAvg = totHolding > 0 ? ((anchorQty * anchorAvgPrice) + (gridQty * gridAvgPrice) + (runnerQty * runnerAvgPrice)) / totHolding : 0.0;
         const retVsAvg = totAvg > 0 ? ((c - totAvg) / totAvg) * 100.0 : 0.0;
 
         daily.push({
