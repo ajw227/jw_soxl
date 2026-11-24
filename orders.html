@@ -999,7 +999,7 @@
       }
 
       let ok = false;
-      for (const ep of ["/api/soxl", "./soxl_latest.json"]) {
+      for (const ep of ["/api/soxl", `./soxl_latest.json?t=${Date.now()}`]) {
         try {
           const resp = await fetch(ep, { cache: "no-store" });
           if (resp.ok) {
