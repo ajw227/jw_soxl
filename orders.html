@@ -621,20 +621,21 @@
         if (plannedStarQty > 0) {
           const recCash1 = Math.round(plannedStarQty * priceStar);
           cashAfterSellVal = cash + (plannedStarQty * priceStar);
+          const starSign = starRate >= 0 ? "+" : "";
           orders.push({
             type: "SELL",
             side: "SELL",
-            orderType: "지정가",
+            orderType: "LOC",
             rawQty: plannedStarQty,
             rawPrice: priceStar.toFixed(2),
-            badge: "지정가 매도",
+            badge: "LOC 매도",
             badgeColor: "bg-pink-100 text-pink-800 border-pink-200",
-            title: `별률 쿼터 익절 (+${starRate.toFixed(1)}% · 25%)`,
+            title: `별률 쿼터 ${starRate >= 0 ? "익절" : "매도"} (${starSign}${starRate.toFixed(1)}% · 25%)`,
             priceStr: `$${priceStar.toFixed(2)} 이상`,
             qtyStr: `${plannedStarQty.toLocaleString()} 주`,
             amountStr: `+$${recCash1.toLocaleString()}`,
-            reason: "보유량의 25%를 선제 익절하여 현금을 확충합니다.",
-            copyText: `[SOXL 매도 지정가] $${priceStar.toFixed(2)} / ${plannedStarQty}주`
+            reason: "보유량의 25%를 LOC로 매도하여 현금을 확충합니다.",
+            copyText: `[SOXL 매도 LOC] $${priceStar.toFixed(2)} / ${plannedStarQty}주`
           });
         }
 
